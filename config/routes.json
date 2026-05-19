@@ -1,8 +1,8 @@
 {
     "root": "pokemonshowdown.com",
-    "client": "https://aslclientshowdown-production.up.railway.app/",
-    "dex": "dex.pokemonshowdown.com",
-    "replays": "replay.pokemonshowdown.com",
+    "client": "aslclientshowdown-production.up.railway.app",
+    "dex": "asl-pokemon-showdown-dex-production.up.railway.app",
+    "replays": "asl-pokemon-showdown-client-production.up.railway.app",
     "users": "pokemonshowdown.com/users",
     "teams": "teams.pokemonshowdown.com"
 }
