@@ -43,6 +43,7 @@ export declare namespace Dex {
 	export type StatNameExceptHP = DexData.StatNameExceptHP;
 	export type BoostStatName = DexData.BoostStatName;
 	export type TypeName = DexData.TypeName;
+	export type CategoryName = DexData.CategoryName;
 	export type StatusName = DexData.StatusName;
 	export type GenderName = DexData.GenderName;
 	export type NatureName = DexData.NatureName;
@@ -229,16 +230,8 @@ export const Dex = new class implements ModdedDex {
 
 	pokeballs: string[] | null = null;
 
-	resourcePrefix = (() => {
-		let prefix = '';
-		if (window.document?.location?.protocol !== 'http:') prefix = 'https:';
-		return `${prefix}//${window.Config ? Config.routes.client : 'play.pokemonshowdown.com'}/`;
-	})();
-
-	fxPrefix = (() => {
-		const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
-		return `${protocol}//${window.Config ? Config.routes.client : 'play.pokemonshowdown.com'}/fx/`;
-	})();
+	resourcePrefix = 'https://aslclientshowdown-production.up.railway.app/';
+	fxPrefix = 'https://aslclientshowdown-production.up.railway.app/fx/';
 
 	loadedSpriteData = { xy: 1, bw: 0 };
 	moddedDexes: { [mod: string]: ModdedDex } = {};
@@ -252,6 +245,7 @@ export const Dex = new class implements ModdedDex {
 	afdMode?: boolean | 'sprites';
 
 	mod(modid: ID): ModdedDex {
+		console.log("battle-dex constructor with modid", modid)
 		if (modid === 'gen9') return this;
 		if (!window.BattleTeambuilderTable) return this;
 		if (modid in this.moddedDexes) {
@@ -279,6 +273,24 @@ export const Dex = new class implements ModdedDex {
 		}
 		if (dex.gen === 8 && formatid.includes('bdsp')) {
 			dex = Dex.mod('gen8bdsp' as ID);
+		}
+		if (dex.gen === 9 && formatid.includes('aslrelicanthdraft')) {
+			dex = Dex.mod('gen9aslrelicanthdraft' as ID);
+		}
+		if (dex.gen === 9 && formatid.includes('championsnatdexdraft')) {
+			dex = Dex.mod('gen9championsnatdexdraft' as ID);
+		}
+		if (dex.gen === 9 && formatid.includes('mysticnatdexdraft')) {
+			dex = Dex.mod('gen9mysticnatdexdraft' as ID);
+		}
+		if (dex.gen === 9 && formatid.includes('predlczanatdexdraft')) {
+			dex = Dex.mod('gen9predlczanatdexdraft' as ID);
+		}
+		if (dex.gen === 9 && formatid.includes('zachampsnatdexdraft')) {
+			dex = Dex.mod('gen9zachampsnatdexdraft' as ID);
+		}
+		if (dex.gen === 9 && formatid.includes('zanatdexdraft')) {
+			dex = Dex.mod('gen9zanatdexdraft' as ID);
 		}
 		return dex;
 	}
@@ -773,27 +785,26 @@ export const Dex = new class implements ModdedDex {
 	}
 
 	getPokemonIconNum(id: ID, isFemale?: boolean, facingLeft?: boolean) {
+		console.log("getting icon num", id)
 		let num = 0;
 		if (window.BattlePokemonSprites?.[id]?.num) {
+			console.log("using BattlePokemonSprites")
 			num = BattlePokemonSprites[id].num;
 		} else if (window.BattlePokedex?.[id]?.num) {
+			console.log("using BattlePokedex")
 			num = BattlePokedex[id].num;
 		}
 		if (num < 0) num = 0;
 		if (num > 1025) num = 0;
 
 		if (window.BattlePokemonIconIndexes?.[id]) {
+			console.log("using BattlePokemonIconIndexes")
 			num = BattlePokemonIconIndexes[id];
 		}
 
 		if (isFemale) {
 			if (['unfezant', 'frillish', 'jellicent', 'meowstic', 'pyroar'].includes(id)) {
 				num = BattlePokemonIconIndexes[id + 'f'];
-			}
-		}
-		if (facingLeft) {
-			if (BattlePokemonIconIndexesLeft[id]) {
-				num = BattlePokemonIconIndexesLeft[id];
 			}
 		}
 		return num;
@@ -811,6 +822,7 @@ export const Dex = new class implements ModdedDex {
 		}
 
 		let id = toID(pokemon);
+		console.log("Getting id", Dex.modid, id, pokemon)
 		if (!pokemon || typeof pokemon === 'string') pokemon = null;
 		// @ts-expect-error safe, but too lazy to cast
 		if (pokemon?.speciesForme) id = toID(pokemon.speciesForme);
@@ -822,13 +834,60 @@ export const Dex = new class implements ModdedDex {
 			id = toID(pokemon.volatiles.formechange[1]);
 		}
 		let num = this.getPokemonIconNum(id, pokemon?.gender === 'F', facingLeft);
+		
 
 		let top = Math.floor(num / 12) * 30;
 		let left = (num % 12) * 40;
-		let fainted = ((pokemon as Pokemon | ServerPokemon)?.fainted ?
-			`;opacity:.3;filter:grayscale(100%) brightness(.5)` : ``);
-		return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-sheet.png?v19) no-repeat scroll -${left}px -${top}px${fainted}`;
+		console.log("ID for", num, left, top)
+		const fainted = (pokemon as Pokemon | ServerPokemon)?.fainted ?
+		`;opacity:.3;filter:grayscale(100%) brightness(.5)` :
+		``;
+
+		// =========================
+		// Mega overlay species list
+		// =========================
+
+		const megaMons = new Set([
+			'dudunsparcemega',
+			'dudunsparcethreesegmentmega',
+			'delibirdmega',
+			'sirfetchdmega',
+			'ariadosmega',
+			'rapidashmega',
+			'rapidashgalarmega',
+			'luvdiscmega',
+			'electrodemega',
+			'lickilickymega',
+			'carnivinemega',
+			'typhlosionmega',
+			'tropiusmega',
+			'cursolamega',
+			'helioliskmega',
+			'pluslemega',
+			'minunmega',
+			'shucklemega',
+			'dhelmisemega',
+			'flygonmega',
+			'victinimega',
+		]);
+
+		let overlay = ``;
+
+		if (megaMons.has(id)) {
+			overlay = `
+				url(https://aslclientshowdown-production.up.railway.app/sprites/megastone.png)
+				no-repeat 0 0,
+		`;
 	}
+
+	return `
+		background:
+			${overlay}
+			transparent url(https://aslclientshowdown-production.up.railway.app/sprites/pokemonicons-sheet.png)
+			no-repeat scroll -${left}px -${top}px
+		${fainted}
+	`;
+}
 
 	getTeambuilderSpriteData(pokemon: any, dex: ModdedDex = Dex): TeambuilderSpriteData {
 		let gen = dex.gen;
@@ -960,6 +1019,8 @@ export const Dex = new class implements ModdedDex {
 export class ModdedDex {
 	readonly gen: number;
 	readonly modid: ID;
+
+	
 	readonly cache = {
 		Moves: {} as { [k: string]: Move },
 		Items: {} as { [k: string]: Item },
